@@ -62,6 +62,7 @@ uint8_t flPin = intPinDef;
 uint16_t DAC_settings_L = Default_L;
 uint16_t DAC_settings_R = Default_R;
 uint8_t data;
+char buflcd [20];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -159,7 +160,6 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-
 		switch (flPin) {
 		case intPinENT:
 			flPin = intPinDef;
@@ -168,7 +168,7 @@ int main(void)
 
 
 				lcd_Goto(3, 10);
-				lcd_PrintC("MENU");
+				lcd_PrintC("EDIT ");
 				HAL_Delay(100);
 				lcd_Clear();
 			}
@@ -365,6 +365,10 @@ case 0x04:
 	lcd_PrintC("<");
 break;
 
+case 0x05:
+	lcd_Goto(2, 19);
+	lcd_PrintC("<");
+break;
 
 
 
@@ -373,62 +377,69 @@ break;
 switch (input){
 case 0x00:
 	lcd_Goto(0, 0);
-	lcd_PrintC("USB");
+	lcd_PrintC("USB     ");
 break;
 case 0x01:
 	lcd_Goto(0, 0);
-	lcd_PrintC("S/PDIF");
+	lcd_PrintC("S/PDIF  ");
 break;
 case 0x02:
 	lcd_Goto(0, 0);
-	lcd_PrintC("TOSLINK");
+	lcd_PrintC("TOSLINK ");
 break;
 }
 
 switch (sample_rate){
 case 0x00:
 	lcd_Goto(0, 10);
-	lcd_PrintC("48kHz ");
+	lcd_PrintC("48kHz   ");
 break;
 case 0x01:
 	lcd_Goto(0, 10);
-	lcd_PrintC("96kHz ");
+	lcd_PrintC("96kHz   ");
 break;
 case 0x02:
 	lcd_Goto(0, 10);
-	lcd_PrintC("192kHz");
+	lcd_PrintC("192kHz  ");
 break;
 }
 
 switch (mute){
 case 0x00:
 	lcd_Goto(1, 0);
-	lcd_PrintC("MUTE");
+	lcd_PrintC("MUTE    ");
 break;
 case 0x01:
 	lcd_Goto(1, 0);
-	lcd_PrintC("PLAY");
+	lcd_PrintC("PLAY    ");
 break;
 }
 
 switch (bit_rate){
 case 0x00:
 	lcd_Goto(1, 10);
-	lcd_PrintC("16 BIT");
+	lcd_PrintC("16 BIT  ");
 break;
 case 0x01:
 	lcd_Goto(1, 10);
-	lcd_PrintC("24 BIT");
+	lcd_PrintC("24 BIT  ");
 break;
 }
 
-for (uint8_t i = 0; i < volume; i++ )
-{
-	lcd_Goto(2, i);
-	lcd_PrintC(0xFF);
-	//lcd_Data(0xFF);
 
-}
+
+lcd_Goto(3, 10);
+if (ENTstatus == mainM) lcd_PrintC("MENU ");
+
+
+lcd_Goto(2, 0);
+if (volume == 20) {
+	lcd_PrintC("VOLUME:   MAX");
+} else {
+sprintf(buflcd, "VOLUME:   %d%%", volume*5);
+lcd_PrintC(buflcd); }
+
+
 
 
 Time();
