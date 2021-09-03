@@ -44,7 +44,6 @@ extern "C" {
 #include "tim.h"
 #include "gpio.h"
 #include "stm32f1xx_hal_flash.h"
-#include "stm32f1xx_hal_flash_ex.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

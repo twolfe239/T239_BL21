@@ -20,7 +20,7 @@ void lcd_Goto(uint8_t row, uint8_t col) {
 	}
 }
 
-void lcd_PrintC(const uint8_t *str) {
+void lcd_PrintC(uint8_t *str) {
  	uint8_t i;
  	while (i = *str++){
     	lcd_Data(i);

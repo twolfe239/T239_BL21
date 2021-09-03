@@ -35,7 +35,7 @@ void lcd_LClear(void);
 /*void lcd_Backlight(uint8_t state);*/
 void lcd_BL(uint8_t state);
 void lcd_Goto(uint8_t row, uint8_t col); 
-void lcd_PrintC(const uint8_t *str);
+void lcd_PrintC(uint8_t *str);
 
 
 void lcd_Send(uint8_t data);
