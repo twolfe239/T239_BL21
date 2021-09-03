@@ -60,6 +60,7 @@ extern "C" {
 /* USER CODE BEGIN Prototypes */
 void DAC_Init(void);
 void DAC_Write(uint16_t data_L, uint16_t data_R);
+void Set_Settings(uint8_t input,uint8_t sample_rate,uint8_t bit_rate,uint8_t mute,uint8_t volume);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

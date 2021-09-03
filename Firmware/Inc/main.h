@@ -43,6 +43,8 @@ extern "C" {
 #include "spi.h"
 #include "tim.h"
 #include "gpio.h"
+#include "stm32f1xx_hal_flash.h"
+#include "stm32f1xx_hal_flash_ex.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -125,6 +127,8 @@ void Error_Handler(void);
 #define bit_rateM 0x04
 #define volumeM 0x05
 
+
+#define SettingsPage 0x0801FC00
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

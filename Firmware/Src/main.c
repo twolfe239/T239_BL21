@@ -19,12 +19,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "i2c.h"
-#include "iwdg.h"
-#include "rtc.h"
-#include "spi.h"
-#include "tim.h"
-#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -54,14 +48,12 @@ uint8_t sample_rate = 0; //target 2
 uint8_t drmck = 0;
 uint8_t bit_rate = 0;  //target 4
 uint8_t volume = 20; //target 5
-uint16_t volumeCurrent = 20;
 uint8_t mute = 0; //target 3
 uint8_t target = 1;
 uint8_t ENTstatus = 0;
 uint8_t flPin = intPinDef;
-uint16_t DAC_settings_L = Default_L;
-uint16_t DAC_settings_R = Default_R;
-uint8_t data;
+
+uint16_t settings;
 char buflcd [20];
 /* USER CODE END PV */
 
@@ -145,6 +137,21 @@ int main(void)
 	RCV_Init();
 	I2S_ENABLE();
 	DIR_CS8416();
+	//------------------------------------------------------------------ FLASH READ Settings
+	settings = 0x00;
+	HAL_FLASH_Unlock();
+	FLASH_PageErase(SettingsPage);
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD,SettingsPage, settings);
+	HAL_FLASH_Lock();
+
+
+settings = *(__IO uint16_t*)(SettingsPage);
+input = (settings & 0b1100000000000000) >> 14;
+sample_rate = (settings & 0b11000000000000) >> 12;
+bit_rate = (settings & 0b10000000000) >> 10;
+mute = (settings & 0b100000000000) >> 11;
+volume = (settings & 0b1111111000) >> 3;
+Set_Settings(input, sample_rate, bit_rate, mute, volume);
 	//------------------------------------------------------------------ Knock-knock-knock
 	SPON();
 	HAL_Delay(50);
@@ -179,83 +186,23 @@ int main(void)
 				lcd_Clear();
 				ENTstatus = mainM;
 				//WRITE SETTINGS!
-				switch (input){
-				case 0x00:
-					DIR_XMOS();
-				break;
-				case 0x01:
-					DIR_CS8416();
-					 data = R_SPDIF;
-					HAL_I2C_Mem_Write(&hi2c1, CS8416_ADDR, R_Control4, 1, &data, 1, 500);
-				break;
-				case 0x02:
-					DIR_CS8416();
-					 data = R_TOSLINK;
-					HAL_I2C_Mem_Write(&hi2c1, CS8416_ADDR, R_Control4, 1, &data, 1, 500);
-				break;
-				}
 
-				switch (sample_rate){
-				case 0x00:
-					if (bit_rate) {
-					DAC_settings_L = Default_L;
-					DAC_settings_R = Default_R;
-					DAC_Write(DAC_settings_L, DAC_settings_R);
-					} else {
+			Set_Settings(input, sample_rate, bit_rate, mute, volume);
+			settings = 0;
+			settings = input << 14 | sample_rate << 12 | mute << 11 | bit_rate << 10 | volume << 3;
+		   uint16_t settings_tmp = *(__IO uint16_t*)(SettingsPage);
+		    if (settings_tmp != settings){
+		    HAL_FLASH_Unlock();
+			FLASH_PageErase(SettingsPage);
+			HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD,SettingsPage, settings);
+			HAL_FLASH_Lock();
+		    }
 
-						DAC_settings_L = Default_L|BR16;
-						DAC_settings_R = Default_R|BR16;
-						DAC_Write(DAC_settings_L, DAC_settings_R);
-					}
-				break;
-				case 0x01:
-					if (bit_rate) {
-					DAC_settings_L = Default_L|SR96;
-					DAC_settings_R = Default_R|SR96;
-					DAC_Write(DAC_settings_L, DAC_settings_R);
-				} else {
 
-					DAC_settings_L = Default_L|SR96|BR16;
-					DAC_settings_R = Default_R|SR96|BR16;
-					DAC_Write(DAC_settings_L, DAC_settings_R);
-				}
-				break;
-				case 0x02:
-					if (bit_rate) {
-					DAC_settings_L = SR192;
-					DAC_settings_R = SR192;
-					DAC_Write(DAC_settings_L, DAC_settings_R);
-			} else {
 
-				DAC_settings_L = DAC_settings_L|SR192|BR16;
-				DAC_settings_R = DAC_settings_R|SR192|BR16;
-				DAC_Write(DAC_settings_L, DAC_settings_R);
+
+
 			}
-				break;
-				}
-
-				switch (mute){
-				case 0x00:
-					MUTE_ENABLE();
-				break;
-				case 0x01:
-					MUTE_DISABLE();
-				break;
-				}
-
-
-//Volume
-				volumeCurrent = volume * 0x333;
-				if(volume == 20) {
-					DAC_Write(VolumeMax_L, VolumeMax_R);
-				}
-				if(volume == 0) {
-					DAC_Write(Volume_L, Volume_R);
-				}
-				DAC_Write(volumeCurrent<<2|Volume_L, volumeCurrent<<2|Volume_R);
-			}
-
-
 			break;
 
 
@@ -387,6 +334,9 @@ case 0x02:
 	lcd_Goto(0, 0);
 	lcd_PrintC("TOSLINK ");
 break;
+default:
+//	input = 0;
+break;
 }
 
 switch (sample_rate){
@@ -402,6 +352,9 @@ case 0x02:
 	lcd_Goto(0, 10);
 	lcd_PrintC("192kHz  ");
 break;
+default:
+//	sample_rate = 0;
+break;
 }
 
 switch (mute){
@@ -412,6 +365,9 @@ break;
 case 0x01:
 	lcd_Goto(1, 0);
 	lcd_PrintC("PLAY    ");
+break;
+default:
+//	mute = 0;
 break;
 }
 
@@ -424,6 +380,9 @@ case 0x01:
 	lcd_Goto(1, 10);
 	lcd_PrintC("24 BIT  ");
 break;
+default:
+//	bit_rate = 0;
+break;
 }
 
 
@@ -431,6 +390,7 @@ break;
 lcd_Goto(3, 10);
 if (ENTstatus == mainM) lcd_PrintC("MENU ");
 
+//if (volume > 20) { volume = 0;}
 
 lcd_Goto(2, 0);
 if (volume == 20) {
