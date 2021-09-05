@@ -53,7 +53,7 @@ uint8_t target = 1;
 uint8_t ENTstatus = 0;
 uint8_t flPin = intPinDef;
 
-uint16_t settings;
+uint32_t settings;
 char buflcd[20];
 /* USER CODE END PV */
 
@@ -148,7 +148,19 @@ int main(void) {
 	HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, SettingsPage, settings);
 	HAL_FLASH_Lock();*/
 
-	settings = *(__IO uint16_t*) (SettingsPage);
+	settings = *(__IO uint32_t*) (SettingsPage);
+
+	uint8_t crc_flash = crc8((uint8_t*) &settings, 2);
+	uint8_t crc_write = ((*(__IO uint32_t*) (SettingsPage))>>16);
+
+	if (crc_flash != crc_write){
+		settings = 0x00;
+			HAL_FLASH_Unlock();
+			HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError);
+			HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, SettingsPage, settings);
+			HAL_FLASH_Lock();
+	}
+
 	input = (settings & 0b1100000000000000) >> 14;
 	sample_rate = (settings & 0b11000000000000) >> 12;
 	bit_rate = (settings & 0b10000000000) >> 10;
@@ -193,15 +205,15 @@ int main(void) {
 				settings = 0;
 				settings = input << 14 | sample_rate << 12 | mute << 11
 						| bit_rate << 10 | volume << 3;
-				uint16_t settings_tmp = *(__IO uint16_t*) (SettingsPage);
+				uint32_t settings_tmp = *(__IO uint32_t*) (SettingsPage);
 				if (settings_tmp != settings) {
 
+					uint8_t crc = crc8((uint8_t*) &settings, 2);
+					settings |= crc << 16;
+
 					HAL_FLASH_Unlock();
-
 					HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError);
-
-					HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, SettingsPage,
-							settings);
+					HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, SettingsPage, settings);
 					HAL_FLASH_Lock();
 				}
 
