@@ -50,7 +50,7 @@ uint8_t crc8(uint8_t *buf, uint32_t size)
 {
     uint8_t crc = 0xFF;
 
-    while (len--) crc = crc8_update(crc,*buf++);
+    while (size--) crc = crc8_update(crc,*buf++);
 
     return crc;
 }

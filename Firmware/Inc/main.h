@@ -128,7 +128,7 @@ void Error_Handler(void);
 #define bit_rateM 0x04
 #define volumeM 0x05
 
-
+#define sel "<"
 #define SettingsPage 0x0801FC00
 /* USER CODE END Private defines */
 
