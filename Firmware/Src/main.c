@@ -19,6 +19,12 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
+#include "iwdg.h"
+#include "rtc.h"
+#include "spi.h"
+#include "tim.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -162,6 +168,11 @@ int main(void)
 	mute = (settings & 0b100000000000) >> 11;
 	volume = (settings & 0b1111111000) >> 3;
 	Set_Settings(input, sample_rate, bit_rate, mute, volume);
+
+	//------------------------------------------------------------------ ENCODER
+	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
+    int32_t prevCounter = 0;
+    int32_t currCounter = 0;
 	//------------------------------------------------------------------ Knock-knock-knock
 	SPON();
 	HAL_Delay(50);
@@ -298,6 +309,26 @@ int main(void)
 
 		case intPinDef:  // LCD Overview
 
+
+
+
+
+
+		    currCounter = __HAL_TIM_GET_COUNTER(&htim3);
+		    currCounter = 32767 - ((currCounter-1) & 0xFFFF) / 2;
+		    if(currCounter != prevCounter) {
+		        char buff[16];
+		        sprintf(buff, "%06d", currCounter);
+		        prevCounter = currCounter;
+				lcd_Goto(3, 10);
+				lcd_PrintC(buff);
+		    }
+
+
+
+
+
+
 			switch (target) {
 
 			case 0x01:
@@ -420,7 +451,7 @@ ENTstatus = applyM;
 
 			lcd_Goto(3, 10);
 			if (ENTstatus == mainM)
-				lcd_PrintC("MENU ");
+	//			lcd_PrintC("MENU ");
 
 if (volume > 20) {
 			flPin = intPinENT;
