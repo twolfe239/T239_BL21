@@ -6,7 +6,7 @@
 uint16_t DAC_settings_L = Default_L;
 uint16_t DAC_settings_R = Default_R;
 uint8_t data;
-uint16_t volumeCurrent = 20;
+uint16_t volumeCurrent = 100;
 /* USER CODE END 0 */
 
 
@@ -97,8 +97,8 @@ void Set_Settings(uint8_t input,uint8_t sample_rate,uint8_t bit_rate,uint8_t mut
 
 
 //Volume
-				volumeCurrent = volume * 0x333;
-				if(volume == 20) {
+				volumeCurrent = volume * 0xA3;
+				if(volume == 100) {
 					DAC_Write(VolumeMax_L, VolumeMax_R);
 				}
 				if(volume == 0) {

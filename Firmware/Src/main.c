@@ -53,7 +53,7 @@ uint8_t rrmck = 0;
 uint8_t sample_rate = 0; //target 2
 uint8_t drmck = 0;
 uint8_t bit_rate = 0;  //target 4
-uint8_t volume = 20; //target 5
+uint8_t volume = 100; //target 5
 uint8_t mute = 0; //target 3
 uint8_t target = 1;
 uint8_t ENTstatus = 0;
@@ -244,7 +244,7 @@ int main(void)
 			flPin = intPinDef;
 			if (ENTstatus) {
 // IN SETTINGS
-				lcd_Clear();
+				//lcd_Clear();
 				switch (target) {
 				case inputM:
 					ENTstatus = applyM;
@@ -286,7 +286,7 @@ int main(void)
 
 			flPin = intPinDef;
 			if (ENTstatus) {
-				lcd_Clear();
+			//	lcd_Clear();
 // IN SETTINGS
 				switch (target) {
 				case inputM:
@@ -307,8 +307,8 @@ int main(void)
 					break;
 				case volumeM:
 					ENTstatus = applyM;
-					if (volume == 20)
-						volume = 20;
+					if (volume == 100)
+						volume = 100;
 					else
 						volume++;
 					break;
@@ -461,16 +461,16 @@ ENTstatus = applyM;
 			if (ENTstatus == mainM)
 				lcd_PrintC("MENU ");
 
-if (volume > 20) {
+if (volume > 100) {
 			flPin = intPinENT;
 			ENTstatus = applyM;
 			volume = 0;}
 
 			lcd_Goto(2, 0);
-			if (volume == 20) {
+			if (volume == 100) {
 				lcd_PrintC("VOLUME:   MAX");
 			} else {
-				sprintf(buflcd, "VOLUME:   %d%%", volume * 5);
+				sprintf(buflcd, "VOLUME:   %d%%", volume);
 				lcd_PrintC(buflcd);
 			}
 
