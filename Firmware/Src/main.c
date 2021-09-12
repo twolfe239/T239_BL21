@@ -58,7 +58,8 @@ uint8_t mute = 0; //target 3
 uint8_t target = 1;
 uint8_t ENTstatus = 0;
 uint8_t flPin = intPinDef;
-
+int32_t currCounter = 0;
+uint8_t direct = 0;
 uint32_t settings;
 char buflcd[20];
 /* USER CODE END PV */
@@ -71,6 +72,22 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+
+//void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+
+//}
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+        if(htim->Instance == TIM3)
+        {
+		    currCounter = __HAL_TIM_GET_COUNTER(&htim3);
+	         direct = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3);
+	         if (direct) flPin = intPinR;
+	         else flPin = intPinL;
+
+        }
+}
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 //	flIntrpt = 1;
@@ -171,8 +188,7 @@ int main(void)
 
 	//------------------------------------------------------------------ ENCODER
 	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
-    int32_t prevCounter = 0;
-    int32_t currCounter = 0;
+
 	//------------------------------------------------------------------ Knock-knock-knock
 	SPON();
 	HAL_Delay(50);
@@ -314,15 +330,7 @@ int main(void)
 
 
 
-		    currCounter = __HAL_TIM_GET_COUNTER(&htim3);
-		    currCounter = 32767 - ((currCounter-1) & 0xFFFF) / 2;
-		    if(currCounter != prevCounter) {
-		        char buff[16];
-		        sprintf(buff, "%06d", currCounter);
-		        prevCounter = currCounter;
-				lcd_Goto(3, 10);
-				lcd_PrintC(buff);
-		    }
+
 
 
 
@@ -451,7 +459,7 @@ ENTstatus = applyM;
 
 			lcd_Goto(3, 10);
 			if (ENTstatus == mainM)
-	//			lcd_PrintC("MENU ");
+				lcd_PrintC("MENU ");
 
 if (volume > 20) {
 			flPin = intPinENT;
