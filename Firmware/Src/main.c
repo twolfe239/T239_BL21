@@ -53,12 +53,13 @@ uint8_t rrmck = 0;
 uint8_t sample_rate = 0; //target 2
 uint8_t drmck = 0;
 uint8_t bit_rate = 0;  //target 4
-uint8_t volume = 100; //target 5
+uint16_t volume = 100; //target 5
 uint8_t mute = 0; //target 3
 uint8_t target = 1;
 uint8_t ENTstatus = 0;
 uint8_t flPin = intPinDef;
-int32_t currCounter = 0;
+uint8_t flPinBut = 0;
+uint16_t currCounter = 500;
 uint8_t direct = 0;
 uint32_t settings;
 char buflcd[20];
@@ -74,18 +75,21 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 
-//void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-
-//}
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
         if(htim->Instance == TIM3)
         {
-		    currCounter = __HAL_TIM_GET_COUNTER(&htim3);
-	         direct = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3);
-	         if (direct) flPin = intPinR;
-	         else flPin = intPinL;
+		    currCounter = __HAL_TIM_GET_COUNTER(&htim3) / 2;
+		    direct = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3);
 
+	         if (direct) {
+
+	        	 flPin = intPinR;
+	         }
+	         else
+	         {
+	        	 flPin = intPinL;
+	         }
         }
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -98,10 +102,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 	if (GPIO_Pin == GPIO_PIN_2) {
 		flPin = intPinR;
+		flPinBut = 1;
 	}
 
 	if (GPIO_Pin == GPIO_PIN_3) {
 		flPin = intPinL;
+		flPinBut = 1;
 	}
 }
 
@@ -188,7 +194,7 @@ int main(void)
 
 	//------------------------------------------------------------------ ENCODER
 	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
-
+	__HAL_TIM_SET_COUNTER (&htim3, 1000);
 	//------------------------------------------------------------------ Knock-knock-knock
 	SPON();
 	HAL_Delay(50);
@@ -264,10 +270,21 @@ int main(void)
 					break;
 				case volumeM:
 					ENTstatus = applyM;
-					if (volume == 0)
-						volume = 0;
-					else
+
+/*
+					volume=volume+(currCounter-500);
+					__HAL_TIM_SET_COUNTER (&htim3, 1000); */
+					if(flPinBut){
+					volume = volume - 5;
+					if (volume <= 0) volume = 0;
+					if (volume >= 100) volume = 0;
+					}
+					else {
 						volume--;
+						if (volume <= 0) volume = 0;
+						if (volume >= 100) volume = 0;
+					}
+					flPinBut = 0;
 					break;
 				default:
 					break;
@@ -307,10 +324,18 @@ int main(void)
 					break;
 				case volumeM:
 					ENTstatus = applyM;
-					if (volume == 100)
-						volume = 100;
-					else
-						volume++;
+/*
+					volume=volume+(currCounter-500);
+					__HAL_TIM_SET_COUNTER (&htim3, 1000);*/
+					if(flPinBut){
+					volume = volume + 5;
+					if (volume >= 100) volume = 100;
+					}
+					else {
+					volume++;
+					if (volume >= 100) volume = 100;
+					}
+					flPinBut = 0;
 					break;
 				default:
 					break;
@@ -461,10 +486,11 @@ ENTstatus = applyM;
 			if (ENTstatus == mainM)
 				lcd_PrintC("MENU ");
 
+			/*
 if (volume > 100) {
 			flPin = intPinENT;
 			ENTstatus = applyM;
-			volume = 0;}
+			volume = 0;}*/
 
 			lcd_Goto(2, 0);
 			if (volume == 100) {
@@ -504,15 +530,11 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI
-                              |RCC_OSCILLATORTYPE_LSE;
-  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -521,17 +543,17 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
