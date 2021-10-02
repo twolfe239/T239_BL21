@@ -166,11 +166,12 @@ int main(void)
 	CSL_OFF();
 	CSR_OFF();
 	MUTE_ENABLE();
+
 	//------------------------------------------------------------------ Audio Init
 	DAC_Init();
-	RCV_Init();
+//	RCV_Init();
 	I2S_ENABLE();
-	DIR_CS8416();
+
 	//------------------------------------------------------------------ FLASH READ Settings
 
 	settings = *(__IO uint32_t*) (SettingsPage);

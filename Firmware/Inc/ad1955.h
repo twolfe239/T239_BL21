@@ -17,6 +17,18 @@ extern "C" {
 
 
 /* USER CODE BEGIN Private defines */
+
+
+
+#define ModeDac StereoDualMono
+
+
+
+
+
+
+
+
 #define CSL_OFF() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_SET)
 #define CSL_ON() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET)
 #define CSR_OFF() HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET)
@@ -53,6 +65,12 @@ extern "C" {
 #define VolumeMax_R 0xFFFF
 #define Volume_L 0x02
 #define Volume_R 0x03
+
+
+
+#define StereoDualMono 0x01
+#define MonoLeft 0x02
+#define MonoRight 0x03
 
 /* USER CODE END Private defines */
 

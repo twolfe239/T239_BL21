@@ -19,14 +19,45 @@ void DAC_Init(void)
 	MUTE_DISABLE();
 	HAL_Delay(500);
 	uint16_t dac_address_cmd = 0;
+
+	if (ModeDac == StereoDualMono) {
+
 	CSL_ON();
      dac_address_cmd = Default_L;
      HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
  	CSL_OFF();
+
+
+
 	CSR_ON();
      dac_address_cmd = Default_R;
      HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
  	CSR_OFF();
+
+
+
+	}
+
+
+
+
+	if (ModeDac == MonoLeft) {
+	CSL_ON();
+     dac_address_cmd = Default_L;
+     HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
+ 	CSL_OFF();
+	}
+
+
+	if (ModeDac == MonoRight) {
+	CSR_ON();
+     dac_address_cmd = Default_R;
+     HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
+ 	CSR_OFF();
+	}
+
+
+
 }
 
 void Set_Settings(uint8_t input,uint8_t sample_rate,uint8_t bit_rate,uint8_t mute,uint8_t volume)
@@ -115,15 +146,51 @@ void Set_Settings(uint8_t input,uint8_t sample_rate,uint8_t bit_rate,uint8_t mut
 
 void DAC_Write(uint16_t data_L, uint16_t data_R )
 {
+
 	uint16_t dac_address_cmd = 0;
+
+
+	if (ModeDac == StereoDualMono) {
+
+
+		/*
 	CSL_ON();
      dac_address_cmd = data_L;
      HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
  	CSL_OFF();
+
+
+
+ 	CSR_ON();
+     dac_address_cmd = data_R;
+     HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
+ 	CSR_OFF();
+ 	*/
+	}
+
+	if (ModeDac == MonoLeft) {
+	CSL_ON();
+     dac_address_cmd = data_L;
+     HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
+ 	CSL_OFF();
+	}
+
+
+	if (ModeDac == MonoRight) {
 	CSR_ON();
      dac_address_cmd = data_R;
      HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
  	CSR_OFF();
+	}
+
+
+
+
+
+
+
+
+
 }
 
 /* USER CODE END 1 */
