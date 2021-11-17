@@ -21,7 +21,6 @@
 #include "main.h"
 #include "i2c.h"
 #include "iwdg.h"
-#include "rtc.h"
 #include "spi.h"
 #include "tim.h"
 #include "gpio.h"
@@ -100,15 +99,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		flPin = intPinENT;
 	}
 
-	if (GPIO_Pin == GPIO_PIN_2) {
-		flPin = intPinR;
-		flPinBut = 1;
-	}
-
-	if (GPIO_Pin == GPIO_PIN_3) {
-		flPin = intPinL;
-		flPinBut = 1;
-	}
 }
 
 /* USER CODE END 0 */
@@ -143,7 +133,6 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI1_Init();
   MX_I2C1_Init();
-  MX_RTC_Init();
   MX_TIM3_Init();
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
@@ -160,17 +149,14 @@ int main(void)
 	lcd_Goto(0, 0);
 	lcd_PrintC("AGENDA");
 	//------------------------------------------------------------------ Audio DEInit
-	CS8416_DISABLE();
+
 	AD1955_DISABLE();
-	I2S_DISABLE();
 	CSL_OFF();
 	CSR_OFF();
-	MUTE_ENABLE();
 
 	//------------------------------------------------------------------ Audio Init
 	DAC_Init();
-//	RCV_Init();
-	I2S_ENABLE();
+
 
 	//------------------------------------------------------------------ FLASH READ Settings
 
@@ -253,10 +239,6 @@ int main(void)
 // IN SETTINGS
 				//lcd_Clear();
 				switch (target) {
-				case inputM:
-					ENTstatus = applyM;
-					input == 0 ? input = 2 : input--;
-					break;
 				case sample_rateM:
 					ENTstatus = applyM;
 					sample_rate == 0 ? sample_rate = 2 : sample_rate--;
@@ -293,9 +275,9 @@ int main(void)
 
 			} else {
 				//cycle MENU
-				target == 1 ? target = 5 : target--;
+				target == 2 ? target = 5 : target--;
 				if (target == 0)
-					target = 1;
+					target = 2;
 				ENTstatus = mainM;
 			}
 			break;
@@ -307,10 +289,6 @@ int main(void)
 			//	lcd_Clear();
 // IN SETTINGS
 				switch (target) {
-				case inputM:
-					ENTstatus = applyM;
-					input == 2 ? input = 0 : input++;
-					break;
 				case sample_rateM:
 					ENTstatus = applyM;
 					sample_rate == 2 ? sample_rate = 0 : sample_rate++;
@@ -344,7 +322,7 @@ int main(void)
 
 			} else {
 				//cycle MENU
-				target == 5 ? target = 1 : target++;
+				target == 5 ? target = 2 : target++;
 				ENTstatus = mainM;
 				break;
 			}
@@ -415,15 +393,7 @@ int main(void)
 				lcd_Goto(0, 0);
 				lcd_PrintC("USB     ");
 				break;
-			case 0x01:
-				lcd_Goto(0, 0);
-				lcd_PrintC("S/PDIF  ");
-				break;
-			case 0x02:
-				lcd_Goto(0, 0);
-				lcd_PrintC("TOSLINK ");
-				break;
-			default:
+
 input = 0;
 flPin = intPinENT;
 ENTstatus = applyM;
@@ -501,7 +471,6 @@ if (volume > 100) {
 				lcd_PrintC(buflcd);
 			}
 
-			Time();
 			HAL_IWDG_Refresh(&hiwdg);
 
 			break;
@@ -526,7 +495,6 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -550,12 +518,6 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }

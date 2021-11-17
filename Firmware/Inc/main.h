@@ -36,10 +36,8 @@ extern "C" {
 #include "ssd1306.h"
 #include "i2c_lcd.h"
 #include "ad1955.h"
-#include "cs8416.h"
 #include "i2c.h"
 #include "iwdg.h"
-#include "rtc.h"
 #include "spi.h"
 #include "tim.h"
 #include "gpio.h"
@@ -74,24 +72,12 @@ void Error_Handler(void);
 #define ENTER_Pin GPIO_PIN_0
 #define ENTER_GPIO_Port GPIOA
 #define ENTER_EXTI_IRQn EXTI0_IRQn
-#define R_Pin GPIO_PIN_2
-#define R_GPIO_Port GPIOA
-#define R_EXTI_IRQn EXTI2_IRQn
-#define L_Pin GPIO_PIN_3
-#define L_GPIO_Port GPIOA
-#define L_EXTI_IRQn EXTI3_IRQn
 #define SPI1_CSL_Pin GPIO_PIN_6
 #define SPI1_CSL_GPIO_Port GPIOA
-#define ENI2S_Pin GPIO_PIN_2
-#define ENI2S_GPIO_Port GPIOB
-#define DIRI2S_Pin GPIO_PIN_10
-#define DIRI2S_GPIO_Port GPIOB
 #define RSTD_Pin GPIO_PIN_11
 #define RSTD_GPIO_Port GPIOB
 #define MUTE_Pin GPIO_PIN_12
 #define MUTE_GPIO_Port GPIOB
-#define RSTR_Pin GPIO_PIN_13
-#define RSTR_GPIO_Port GPIOB
 #define SPI1_CSR_Pin GPIO_PIN_15
 #define SPI1_CSR_GPIO_Port GPIOB
 #define BUZZ_Pin GPIO_PIN_8
@@ -106,10 +92,6 @@ void Error_Handler(void);
 
 
 
-#define I2S_DISABLE() HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET)
-#define I2S_ENABLE() HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET)
-#define RCV_DISABLE() HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET)
-#define RCV_ENABLE() HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET)
 #define SPON() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET)
 #define SPOFF() HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET)
 #define intPinENT 0x00

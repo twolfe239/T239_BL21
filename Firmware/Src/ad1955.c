@@ -64,17 +64,10 @@ void Set_Settings(uint8_t input,uint8_t sample_rate,uint8_t bit_rate,uint8_t mut
 {
 	switch (input){
 				case 0x00:
-					DIR_XMOS();
 				break;
 				case 0x01:
-					DIR_CS8416();
-					 data = R_SPDIF;
-					HAL_I2C_Mem_Write(&hi2c1, CS8416_ADDR, R_Control4, 1, &data, 1, 500);
 				break;
 				case 0x02:
-					DIR_CS8416();
-					 data = R_TOSLINK;
-					HAL_I2C_Mem_Write(&hi2c1, CS8416_ADDR, R_Control4, 1, &data, 1, 500);
 				break;
 				}
 
@@ -153,7 +146,7 @@ void DAC_Write(uint16_t data_L, uint16_t data_R )
 	if (ModeDac == StereoDualMono) {
 
 
-		/*
+
 	CSL_ON();
      dac_address_cmd = data_L;
      HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
@@ -165,7 +158,7 @@ void DAC_Write(uint16_t data_L, uint16_t data_R )
      dac_address_cmd = data_R;
      HAL_SPI_Transmit(&hspi1, &dac_address_cmd, 1, 500);
  	CSR_OFF();
- 	*/
+
 	}
 
 	if (ModeDac == MonoLeft) {
